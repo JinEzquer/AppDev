@@ -1,7 +1,15 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
+import CustomButton from '../components/CustomButton';
+import { useAuth } from './auth/AuthContext';
 import { COLORS, IMG, SPACING } from '../utils';
 
 const ProfileScreen = () => {
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -16,6 +24,13 @@ const ProfileScreen = () => {
         <Text style={styles.tagline}>Where Quality Meets the Cold</Text>
         <View style={styles.divider} />
         <Text style={styles.info}>Your trusted source for fresh, tasty cold cuts.</Text>
+
+        <CustomButton
+          label="Log Out"
+          variant="secondary"
+          onPress={handleLogout}
+          containerStyle={styles.logoutButton}
+        />
       </View>
     </View>
   );
@@ -72,6 +87,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textMuted,
     textAlign: 'center',
+    marginBottom: SPACING.lg,
+  },
+  logoutButton: {
+    marginTop: SPACING.sm,
+    width: '100%',
   },
 });
 

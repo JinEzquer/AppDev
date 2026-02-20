@@ -6,8 +6,10 @@ const CustomTextInput = ({
   placeholder,
   value,
   onChangeText,
+  secureTextEntry,
   textStyle,
   containerStyle,
+  ...props
 }) => {
   return (
     <View style={[styles.container, containerStyle]}>
@@ -16,8 +18,10 @@ const CustomTextInput = ({
         placeholder={placeholder}
         value={value}
         onChangeText={onChangeText}
+        secureTextEntry={secureTextEntry}
         placeholderTextColor={COLORS.textMuted}
         style={[styles.input, textStyle]}
+        {...props}
       />
     </View>
   );
