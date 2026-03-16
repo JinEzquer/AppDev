@@ -1,6 +1,22 @@
 pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
 plugins { id("com.facebook.react.settings") }
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+
+// Ensure all dependencies (including local Maven repos from node_modules)
+// are resolvable for the whole build.
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+
+        // Local Maven repo bundled with @react-native-async-storage/async-storage
+        maven {
+            url("$rootDir/../node_modules/@react-native-async-storage/async-storage/android/local_repo")
+        }
+    }
+}
+
 rootProject.name = 'Ezquerdev'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')

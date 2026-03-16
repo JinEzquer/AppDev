@@ -1,13 +1,14 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
+import { useDispatch } from 'react-redux';
 import CustomButton from '../components/CustomButton';
-import { useAuth } from './auth/AuthContext';
+import { authLogout } from '../app/actions';
 import { COLORS, IMG, SPACING } from '../utils';
 
 const ProfileScreen = () => {
-  const { logout } = useAuth();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    logout();
+    dispatch(authLogout());
   };
 
   return (

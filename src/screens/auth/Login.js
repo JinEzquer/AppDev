@@ -1,127 +1,135 @@
+import { useState, useEffect } from 'react';
+import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+
 import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
-import { useAuth } from './AuthContext';
-import {
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
 import CustomButton from '../../components/CustomButton';
 import CustomTextInput from '../../components/CustomTextInput';
-import { COLORS, IMG, ROUTES, SPACING } from '../../utils';
+import { IMG, ROUTES } from '../../utils';
+import { authLogin } from '../../app/actions';
 
 const Login = () => {
-  const navigation = useNavigation();
-  const { login } = useAuth();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // TODO: Add actual login logic (e.g. API call, validation)
-    login();
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { isLoading, isError, error } = useSelector(state => state.auth);
+
+  // Show Alert when login fails
+  useEffect(() => {
+    if (isError && error) {
+      Alert.alert('Login Failed', error);
+    }
+  }, [isError, error]);
+
+  const handleLogin = async () => {
+    if (username.trim() === '' || password.trim() === '') {
+      Alert.alert(
+        'Invalid Credentials',
+        'Please enter valid username and password',
+      );
+      return;
+    }
+
+    // Dispatch Redux action that triggers the saga
+    dispatch(authLogin({ username, password }));
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.header}>
-          <Image source={IMG.LOGO} style={styles.logo} resizeMode="contain" />
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to continue</Text>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image source={IMG.LOGO} style={styles.logo} resizeMode="contain" />
+      </View>
 
-        <View style={styles.form}>
-          <CustomTextInput
-            label="Email"
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-          />
-          <CustomTextInput
-            label="Password"
-            placeholder="Enter your password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoComplete="password"
-          />
+      <View style={styles.formContainer}>
+        <CustomTextInput
+          label={'Username'}
+          placeholder={'Enter Username'}
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+          keyboardType="default"
+          editable={!isLoading}
+        />
+        <CustomTextInput
+          label={'Password'}
+          placeholder={'Enter Password'}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          editable={!isLoading}
+        />
+      </View>
 
-          <CustomButton label="Log In" onPress={handleLogin} />
+      {isLoading ? (
+        <ActivityIndicator size="large" color="blue" style={styles.loader} />
+      ) : (
+        <CustomButton
+          label={'LOGIN'}
+          containerStyle={styles.loginButton}
+          textStyle={styles.loginButtonText}
+          onPress={handleLogin}
+        />
+      )}
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate(ROUTES.REGISTER)}>
-              <Text style={styles.link}>Register</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      <View style={styles.registerRow}>
+        <Text>Create an account?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate(ROUTES.REGISTER)} disabled={isLoading}>
+          <Text style={styles.registerText}>Register</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.backgroundWarm,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.xl * 2,
-    paddingBottom: SPACING.xl,
-  },
-  header: {
+    padding: 20,
     alignItems: 'center',
-    marginBottom: SPACING.xl,
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  logoContainer: {
+    marginBottom: 24,
   },
   logo: {
-    width: 100,
-    height: 100,
-    marginBottom: SPACING.md,
+    width: 160,
+    height: 160,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: COLORS.primary,
-    marginBottom: SPACING.xs,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: COLORS.textMuted,
-  },
-  form: {
+  formContainer: {
     width: '100%',
+    marginBottom: 16,
   },
-  footer: {
+  loginButton: {
+    backgroundColor: 'blue',
+    borderRadius: 10,
+    marginVertical: 20,
+    width: '80%',
+  },
+  loginButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  registerRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: SPACING.lg,
+    justifyContent: 'center',
   },
-  footerText: {
-    fontSize: 14,
-    color: COLORS.textMuted,
+  registerText: {
+    color: 'red',
+    marginLeft: 10,
+    fontWeight: 'bold',
   },
-  link: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.accent,
+  loader: {
+    marginVertical: 20,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10,
+    marginTop: 5,
   },
 });
 

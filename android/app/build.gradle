@@ -107,6 +107,18 @@ android {
     }
 }
 
+// Ensure module-level repositories can resolve all dependencies,
+// including local Maven repos from node_modules.
+repositories {
+    google()
+    mavenCentral()
+
+    // Local Maven repo bundled with @react-native-async-storage/async-storage
+    maven {
+        url("$rootDir/../node_modules/@react-native-async-storage/async-storage/android/local_repo")
+    }
+}
+
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")

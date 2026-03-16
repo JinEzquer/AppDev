@@ -1,26 +1,26 @@
-import React from 'react';
+// utils
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { useAuth } from '../screens/auth/AuthContext';
-import AuthNavigation from './AuthNav';
-import MainNavigation from './MainNav';
+import { useEffect } from 'react';
+import { Platform, StatusBar, useColorScheme } from 'react-native';
+import { useSelector } from 'react-redux';
 
-const Stack = createStackNavigator();
+import AuthNav from './AuthNav';
+import MainNav from './MainNav';
 
-const AppNav = () => {
-  const { isLoggedIn } = useAuth();
+export default () => {
+  const isDarkMode = useColorScheme() === 'dark';
+  const { data } = useSelector(state => state.auth);
+  const isLoggedIn = !!data; // User is logged in if Redux auth data exists
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      StatusBar.setBarStyle('dark-content', true);
+    }
+  }, [isDarkMode]);
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isLoggedIn ? (
-          <Stack.Screen name="Main" component={MainNavigation} />
-        ) : (
-          <Stack.Screen name="Auth" component={AuthNavigation} />
-        )}
-      </Stack.Navigator>
+      {isLoggedIn ? <MainNav /> : <AuthNav />}
     </NavigationContainer>
   );
 };
-
-export default AppNav;

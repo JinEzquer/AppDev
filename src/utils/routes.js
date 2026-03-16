@@ -6,4 +6,4 @@ export default {
   // Main
   HOME: 'Home',
   PROFILE: 'Profile',
-};
+}
