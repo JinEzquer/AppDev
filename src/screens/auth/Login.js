@@ -5,8 +5,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../../components/CustomButton';
 import CustomTextInput from '../../components/CustomTextInput';
+
 import { IMG, ROUTES } from '../../utils';
 import { authLogin } from '../../app/actions';
+import { AuthNav2 } from '../../screens/auth';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -16,10 +18,10 @@ const Login = () => {
   const dispatch = useDispatch();
   const { isLoading, isError, error } = useSelector(state => state.auth);
 
-  // Show Alert when login fails
+  
   useEffect(() => {
     if (isError && error) {
-      Alert.alert('Login Failed', error);
+      Alert.alert('Cannot LogIn', error);
     }
   }, [isError, error]);
 
@@ -32,7 +34,7 @@ const Login = () => {
       return;
     }
 
-    // Dispatch Redux action that triggers the saga
+
     dispatch(authLogin({ username, password }));
   };
 

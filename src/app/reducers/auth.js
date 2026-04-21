@@ -33,7 +33,7 @@ export default function reducer(state = INITIALSTATE, action) {
         data: null,
         isLoading: false,
         isError: true,
-        error: action.error || 'Login failed',
+        error: action.error || 'Cannot Login',
       };
 
     case RESET_USER_LOGIN:

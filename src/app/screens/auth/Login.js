@@ -1,62 +1,82 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useState, useEffect } from 'react';
+import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { authLogin } from '../../actions';
 
-const LoginScreen = () => {
-  const [email, setEmail] = useState('');
+import { useNavigation } from '@react-navigation/native';
+import BounceButton from '../../components/BounceButton';
+import CustomTextInput from '../../components/CustomTextInput';
+import { IMG, ROUTES } from '../../utils';
+import { authLogin } from '../../app/actions';
+
+const Login = () => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  
+
+  const navigation = useNavigation();
   const dispatch = useDispatch();
   const { isLoading, isError, error } = useSelector(state => state.auth);
 
-  const handleLogin = () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+  // Show Alert when login fails
+  useEffect(() => {
+    if (isError && error) {
+      Alert.alert('Login Failed', error);
+    }
+  }, [isError, error]);
+
+  const handleLogin = async () => {
+    if (username.trim() === '' || password.trim() === '') {
+      Alert.alert(
+        'Invalid Credentials',
+        'Please enter valid username and password',
+      );
       return;
     }
 
-    // Log the action label so DevTools shows a clear USER_LOGIN entry
-    console.log('USER_LOGIN');
-
-    // Pass an object payload matching the API signature
-    dispatch(authLogin({ username: email, password }));
+    // Dispatch Redux action that triggers the saga
+    dispatch(authLogin({ username, password }));
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      
-      {isError && (
-        <Text style={styles.errorText}>{error}</Text>
+      <View style={styles.logoContainer}>
+        <Image source={IMG.LOGO} style={styles.logo} resizeMode="contain" />
+      </View>
+
+      <View style={styles.formContainer}>
+        <CustomTextInput
+          label={'Username'}
+          placeholder={'Enter Username'}
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+          keyboardType="default"
+          editable={!isLoading}
+        />
+        <CustomTextInput
+          label={'Password'}
+          placeholder={'Enter Password'}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          editable={!isLoading}
+        />
+      </View>
+
+      {isLoading ? (
+        <ActivityIndicator size="large" color="blue" style={styles.loader} />
+      ) : (
+        <BounceButton
+          label={'LOGIN'}
+          onPress={handleLogin}
+        />
       )}
-      
-      <TouchableOpacity 
-        style={[styles.button, isLoading && styles.buttonDisabled]} 
-        onPress={handleLogin}
-        disabled={isLoading}
-      >
-        <Text style={styles.buttonText}>
-          {isLoading ? 'Logging in...' : 'Login'}
-        </Text>
-      </TouchableOpacity>
+
+      <View style={styles.registerRow}>
+        <Text>Create an account?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate(ROUTES.REGISTER)} disabled={isLoading}>
+          <Text style={styles.registerText}>Register</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -64,45 +84,51 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 30,
-    color: '#333',
-  },
-  input: {
-    height: 50,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
     backgroundColor: '#fff',
   },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
+  logoContainer: {
+    marginBottom: 24,
+  },
+  logo: {
+    width: 160,
+    height: 160,
+  },
+  formContainer: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  loginButton: {
+    backgroundColor: 'blue',
+    borderRadius: 10,
+    marginVertical: 20,
+    width: '80%',
+  },
+  loginButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  registerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  buttonDisabled: {
-    backgroundColor: '#ccc',
+  registerText: {
+    color: 'red',
+    marginLeft: 10,
+    fontWeight: 'bold',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  loader: {
+    marginVertical: 20,
   },
   errorText: {
     color: 'red',
     textAlign: 'center',
     marginBottom: 10,
+    marginTop: 5,
   },
 });
 
-export default LoginScreen;
+export default Login;

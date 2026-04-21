@@ -1,7 +1,7 @@
 
 export async function userLogin({ username, password }) {
     
-    const BASE_URL = 'http://10.0.2.2:8000';
+    const BASE_URL = 'http://10.0.2.2:8002';
     const options = {
         method: 'POST',
         headers: {
@@ -34,7 +34,7 @@ export async function userLogin({ username, password }) {
 }
 
 export async function getProfile(token) {
-    const BASE_URL = 'http://10.0.2.2:8000';
+    const BASE_URL = 'http://10.0.2.2:8002';
     const options = {
         method: 'GET',
         headers: {

@@ -10,12 +10,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { useNavigation } from '@react-navigation/native';
 import CustomButton from '../../components/CustomButton';
 import CustomTextInput from '../../components/CustomTextInput';
 import { COLORS, IMG, ROUTES, SPACING } from '../../utils';
-import { useAuth } from './AuthContext';
+import { authLogin } from '../../app/actions';
 import { userRegister } from '../../app/api/auth';
 
 const isValidEmail = (value) => {
@@ -33,7 +34,8 @@ const Register = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigation = useNavigation();
-  const { login } = useAuth();
+  const dispatch = useDispatch();
+  const { isLoading: authIsLoading } = useSelector(state => state.auth);
 
   const canSubmit = useMemo(() => {
     return (
@@ -88,11 +90,9 @@ const Register = () => {
 
       if (result.success) {
         // Auto-login after successful registration
-        const loginResult = await login(email, password);
-        if (!loginResult.success) {
-          Alert.alert('Registration successful', 'Account created! Please login with your credentials.');
-          navigation.navigate(ROUTES.LOGIN);
-        }
+        dispatch(authLogin({ username: email, password }));
+        Alert.alert('Registration successful', 'Account created! Logging you in now...');
+        navigation.navigate(ROUTES.LOGIN);
       } else {
         Alert.alert('Registration Failed', result.error || 'Please try again.');
       }

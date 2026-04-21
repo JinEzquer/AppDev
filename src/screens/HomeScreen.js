@@ -17,6 +17,7 @@ const HomeScreen = () => {
         </View>
         <Text style={styles.title}>Welcome to Patrick's</Text>
         <Text style={styles.subtitle}>Fresh • Tasty • Quality</Text>
+        
 
         <TouchableOpacity
           style={styles.button}
