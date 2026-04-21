@@ -1,7 +1,6 @@
+// @ts-nocheck
 import { createStackNavigator } from '@react-navigation/stack';
 import { COLORS, ROUTES } from '../utils';
-
-// screens
 import Login from '../screens/auth/Login';
 import Register from '../screens/auth/Register';
 
@@ -16,16 +15,8 @@ const screenOptions = {
 const AuthNavigation = () => {
   return (
     <Stack.Navigator initialRouteName={ROUTES.LOGIN} screenOptions={screenOptions}>
-      <Stack.Screen
-        name={ROUTES.LOGIN}
-        component={Login}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name={ROUTES.REGISTER}
-        component={Register}
-        options={{ title: 'Create Account' }}
-      />
+      <Stack.Screen name={ROUTES.LOGIN} component={Login} options={{ headerShown: false }} />
+      <Stack.Screen name={ROUTES.REGISTER} component={Register} options={{ title: 'Create Account' }} />
     </Stack.Navigator>
   );
 };

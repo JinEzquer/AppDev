@@ -4,7 +4,7 @@ export const USER_LOGIN_COMPLETE = 'USER_LOGIN_COMPLETE';
 export const USER_LOGIN_ERROR = 'USER_LOGIN_ERROR';
 export const RESET_USER_LOGIN = 'RESET_USER_LOGIN';
 
-export const authLogin = payload => ({
+export const authLogin = (payload: { username: string; password: string }) => ({
   type: USER_LOGIN,
   payload,
 });

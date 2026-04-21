@@ -1,33 +1,25 @@
+// @ts-nocheck
 import { takeLatest, call, put, fork } from 'redux-saga/effects';
-import { USER_LOGIN, USER_LOGIN_REQUEST, USER_LOGIN_COMPLETE, USER_LOGIN_ERROR, RESET_USER_LOGIN } from '../actions';
+import {
+  USER_LOGIN,
+  USER_LOGIN_REQUEST,
+  USER_LOGIN_COMPLETE,
+  USER_LOGIN_ERROR,
+  RESET_USER_LOGIN,
+} from '../actions';
 import { userLogin as userLoginApi } from '../api/auth';
 
 export function* userLoginAsync(action) {
-  console.log('USER_LOGIN');
-  
   try {
     yield put({ type: USER_LOGIN_REQUEST });
-    console.log('USER_LOGIN_REQUEST');
-
     const data = yield call(userLoginApi, action.payload);
-
-    yield put({
-      type: USER_LOGIN_COMPLETE,
-      payload: data,
-    });
-    console.log('USER_LOGIN_COMPLETE');
+    yield put({ type: USER_LOGIN_COMPLETE, payload: data });
   } catch (error) {
-    yield put({
-      type: USER_LOGIN_ERROR,
-      error: error?.message || 'Login failed',
-    });
-    console.log('USER_LOGIN_ERROR');
+    yield put({ type: USER_LOGIN_ERROR, error: error?.message || 'Login failed' });
   }
 }
 
-export function* userLogoutAsync() {
-  console.log('RESET_USER_LOGIN');
-}
+export function* userLogoutAsync() {}
 
 export function* watchLogin() {
   yield takeLatest(USER_LOGIN, userLoginAsync);

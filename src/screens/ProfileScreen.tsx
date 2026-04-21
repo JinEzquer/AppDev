@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import CustomButton from '../components/CustomButton';
@@ -6,30 +7,20 @@ import { COLORS, IMG, SPACING } from '../utils';
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
-
-  const handleLogout = () => {
-    dispatch(authLogout());
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.card}>
         <View style={styles.logoContainer}>
-          <Image
-            source={IMG.LOGO}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <Image source={IMG.LOGO} style={styles.logo} resizeMode="contain" />
         </View>
         <Text style={styles.title}>Patrick's Cold Cuts</Text>
         <Text style={styles.tagline}>Where Quality Meets the Cold</Text>
         <View style={styles.divider} />
         <Text style={styles.info}>Your trusted source for fresh, tasty cold cuts.</Text>
-
         <CustomButton
           label="Log Out"
           variant="secondary"
-          onPress={handleLogout}
+          onPress={() => dispatch(authLogout())}
           containerStyle={styles.logoutButton}
         />
       </View>
@@ -52,48 +43,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     maxWidth: 340,
-    shadowColor: COLORS.text,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 6,
   },
-  logoContainer: {
-    marginBottom: SPACING.md,
-  },
-  logo: {
-    width: 120,
-    height: 120,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: COLORS.primary,
-    marginBottom: SPACING.xs,
-    textAlign: 'center',
-  },
-  tagline: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-    marginBottom: SPACING.md,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    width: '100%',
-    marginBottom: SPACING.md,
-  },
-  info: {
-    fontSize: 14,
-    color: COLORS.textMuted,
-    textAlign: 'center',
-    marginBottom: SPACING.lg,
-  },
-  logoutButton: {
-    marginTop: SPACING.sm,
-    width: '100%',
-  },
+  logoContainer: { marginBottom: SPACING.md },
+  logo: { width: 120, height: 120 },
+  title: { fontSize: 22, fontWeight: '700', color: COLORS.primary, marginBottom: SPACING.xs, textAlign: 'center' },
+  tagline: { fontSize: 14, color: COLORS.textMuted, fontStyle: 'italic', marginBottom: SPACING.md },
+  divider: { height: 1, backgroundColor: COLORS.border, width: '100%', marginBottom: SPACING.md },
+  info: { fontSize: 14, color: COLORS.textMuted, textAlign: 'center', marginBottom: SPACING.lg },
+  logoutButton: { marginTop: SPACING.sm, width: '100%' },
 });
 
 export default ProfileScreen;

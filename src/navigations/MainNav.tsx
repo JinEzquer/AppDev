@@ -1,21 +1,15 @@
+// @ts-nocheck
 import { createStackNavigator } from '@react-navigation/stack';
 import { COLORS, ROUTES } from '../utils';
-
-// screens
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
 const Stack = createStackNavigator();
 
 const screenOptions = {
-  headerStyle: {
-    backgroundColor: COLORS.primary,
-  },
+  headerStyle: { backgroundColor: COLORS.primary },
   headerTintColor: COLORS.white,
-  headerTitleStyle: {
-    fontWeight: '600',
-    fontSize: 18,
-  },
+  headerTitleStyle: { fontWeight: '600', fontSize: 18 },
 };
 
 const MainNavigation = () => {

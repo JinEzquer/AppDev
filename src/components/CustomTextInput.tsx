@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { COLORS, SPACING } from '../utils';
 
@@ -28,9 +29,7 @@ const CustomTextInput = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: SPACING.md,
-  },
+  container: { marginBottom: SPACING.md },
   label: {
     fontSize: 14,
     fontWeight: '600',

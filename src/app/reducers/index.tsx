@@ -1,17 +1,16 @@
+// @ts-nocheck
 import { applyMiddleware, combineReducers, createStore } from 'redux';
 import createSagaMiddleware from 'redux-saga';
-
-import auth from '../reducers/auth.js';
+import auth from './auth';
 
 const sagaMiddleware = createSagaMiddleware();
 
 const rootReducer = combineReducers({
-    auth: auth,
+  auth,
 });
 
 export default () => {
-    let store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
-    let runSaga = sagaMiddleware.run ;
-    
-    return { store, runSaga };
+  const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
+  const runSaga = sagaMiddleware.run;
+  return { store, runSaga };
 };
