@@ -4,6 +4,7 @@ import {
   USER_LOGIN_COMPLETE,
   USER_LOGIN_ERROR,
   RESET_USER_LOGIN,
+  USER_AUTH_SYNC,
 } from '../actions';
 
 const INITIALSTATE = {
@@ -35,6 +36,26 @@ export default function reducer(state = INITIALSTATE, action) {
       };
     case RESET_USER_LOGIN:
       return INITIALSTATE;
+    case USER_AUTH_SYNC:
+      if (!state.data?.token) return state;
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          user: {
+            ...state.data.user,
+            ...action.payload.user,
+            verified:
+              action.payload.user?.verified ??
+              action.payload.user?.isVerified ??
+              state.data.user?.verified,
+            isVerified:
+              action.payload.user?.isVerified ??
+              action.payload.user?.verified ??
+              state.data.user?.isVerified,
+          },
+        },
+      };
     default:
       return state;
   }
