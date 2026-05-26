@@ -55,5 +55,16 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.ezquerdev.googleauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ezquerdev</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
