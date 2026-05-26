@@ -1,97 +1,134 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Ezquerdev — Patrick's Cold Cuts (Customer Mobile App)
 
-# Getting Started
+React Native customer app for **Patrick's Cold Cuts**. It consumes the Symfony Customer API (`/api/customer/*`) on the shared backend in `PatricksColdCut`.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Features
 
-## Step 1: Start Metro
+- **Guest browse** — shop without signing in
+- **Sign in / register** — JWT (`POST /api/login`) or Google OAuth (with setup below)
+- **Shop** — products, search, categories, favorites
+- **Cart & checkout** — delivery date/address, place order
+- **Orders** — list, detail, pay (GCash, card, cash, bank transfer)
+- **Account** — profile, edit, log out
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Prerequisites
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- Node.js 22+
+- Android Studio + emulator (or physical Android device)
+- **PatricksColdCut** backend — local (`start_server.bat`) or [Railway](https://railway.com/project/26c2459c-7304-43d3-af80-8cfbad07a54f) deploy ([GitHub jean](https://github.com/JinEzquer/jean))
+- `adb` on PATH
 
-```sh
-# Using npm
-npm start
+## API target (local vs Railway)
 
-# OR using Yarn
-yarn start
+Edit **`src/config/apiTarget.ts`**:
+
+| `API_TARGET` | Behavior |
+|--------------|----------|
+| `railway` | Use production API only (same DB as web admin on Railway) |
+| `local` | Use `start_server.bat` on your PC |
+| `auto` | Try Railway first, then local |
+
+Default production URL:
+
+`https://jean-production-dad4.up.railway.app`
+
+Products you add in **Railway admin** appear in the app when `API_TARGET` is `railway`. No extra sync step.
+
+Optional override: copy `src/config/apiTarget.local.example.ts` → `apiTarget.local.ts` (gitignored).
+
+**Google sign-in on Railway:** add this redirect URI in [Google Cloud Console](https://console.cloud.google.com/):
+
+`https://jean-production-dad4.up.railway.app/connect/google/check`
+
+## Quick start
+
+### Option A — Railway API (no local PHP server)
+
+```bat
+cd Ezquerdev
+npm run dev
 ```
 
-## Step 2: Build and run your app
+Keep Metro running; the app talks to Railway over HTTPS.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### Option B — Local API (development)
 
-### Android
+```bat
+REM 1. Backend (PatricksColdCut folder)
+start_server.bat
 
-```sh
-# Using npm
+REM 2. Set API_TARGET to "local" in src/config/apiTarget.ts
+
+REM 3. Mobile
+cd Ezquerdev
+npm run dev
+```
+
+Or two terminals:
+
+```bat
+npm run start:clean
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
-### iOS
+**Do not** use `npx react-native run-android` alone — it skips `adb reverse` and the app stays **black**.
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+`npm run android` / `npm run dev` forward **8081** (Metro) and **8000** (API + **Google OAuth**).
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+Admin in Chrome (same time): `http://127.0.0.1:8000/admin`
 
-```sh
-bundle install
+### Black / blank emulator screen
+
+```bat
+npm run fix:blank
+npm run dev
 ```
 
-Then, and every time you update your native dependencies, run:
+Or:
 
-```sh
-bundle exec pod install
+```bat
+npm run metro:stop
+npm run start:clean
+npm run android
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Emulator: **Ctrl+M** → **Reload**. The app loads JS from **localhost:8081** (via `adb reverse`), not `10.0.2.2`.
 
-```sh
-# Using npm
-npm run ios
+## Google sign-in on emulator
 
-# OR using Yarn
-yarn ios
+Google **blocks** `http://10.0.2.2:8000` (private IP error).
+
+**Before Google sign-in, run:**
+
+```bat
+npm run fix:emulator-network
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+**Google Cloud Console** → Authorized redirect URI (only this one needed for mobile):
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+```text
+http://127.0.0.1:8000/connect/google/check
+```
 
-## Step 3: Modify your app
+Full guide: `../PatricksColdCut/docs/GOOGLE-OAUTH-MOBILE.md`
 
-Now that you have successfully run the app, let's make changes!
+**For grading demos:** use **email + password** — always works. Google is optional extra credit.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## Presenting to instructor
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+- **`../PatricksColdCut/docs/FINAL_PROJECT_INSTRUCTOR_GUIDE.md`** — 10-minute demo script  
+- **`../PatricksColdCut/docs/RUBRIC_CHECKLIST.md`** — criteria ↔ evidence  
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## API
 
-## Congratulations! :tada:
+`src/app/api/customer.ts` — products, profile, orders, payments.
 
-You've successfully run and modified your React Native App. :partying_face:
+## Docs (backend)
 
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+| File | Purpose |
+|------|---------|
+| `FINAL_PROJECT_INSTRUCTOR_GUIDE.md` | Grading demo script |
+| `GOOGLE-OAUTH-MOBILE.md` | Google OAuth on emulator |
+| `PROJECT_SETUP.md` | Full stack setup |
+| `CUSTOMER_API.md` | REST reference |
+| `JWT-HOW-IT-WORKS.md` | Auth for demo |

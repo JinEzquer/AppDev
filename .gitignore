@@ -38,6 +38,9 @@ local.properties
 # node.js
 #
 node_modules/
+
+# Local API override (copy from src/config/apiTarget.local.example.ts)
+src/config/apiTarget.local.ts
 npm-debug.log
 yarn-error.log
 
