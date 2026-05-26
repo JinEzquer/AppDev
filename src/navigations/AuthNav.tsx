@@ -16,7 +16,7 @@ const AuthNavigation = () => {
   return (
     <Stack.Navigator initialRouteName={ROUTES.LOGIN} screenOptions={screenOptions}>
       <Stack.Screen name={ROUTES.LOGIN} component={Login} options={{ headerShown: false }} />
-      <Stack.Screen name={ROUTES.REGISTER} component={Register} options={{ title: 'Create Account' }} />
+      <Stack.Screen name={ROUTES.REGISTER} component={Register} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 };

@@ -1,5 +1,4 @@
-export const IMG = {
-  LOGO: {
-    uri: 'https://placehold.co/256x256/png',
-  },
-};
+/** Patrick's Cold Cuts logo (launcher icon + auth/profile screens). */
+export function getLogoSource() {
+  return require('../assets/logo.png');
+}
