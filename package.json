@@ -3,16 +3,28 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
+    "android": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/android-with-metro.ps1",
+    "connect": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/connect-app.ps1",
+    "emulator": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ensure-emulator.ps1",
+    "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/android-with-metro.ps1 -CleanMetro",
+    "fix:google-oauth": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/fix-emulator-network.ps1",
+    "start:clean": "react-native start --port 8081 --host 0.0.0.0 --reset-cache",
+    "metro:stop": "powershell -NoProfile -Command \"Get-NetTCPConnection -LocalPort 8081 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }\"",
+    "fix:blank": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/fix-mobile-blank.ps1",
+    "fix:emulator-network": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/fix-emulator-network.ps1",
+    "fix:android-ssl": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/fix-android-gradle-ssl.ps1",
+    "android:release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/android-release.ps1",
+    "icons:android": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-android-icons.ps1",
     "ios": "react-native run-ios",
     "lint": "eslint .",
-    "start": "react-native start",
+    "start": "react-native start --port 8081 --host 0.0.0.0",
     "test": "jest",
     "server": "node server.js",
     "server:dev": "nodemon server.js"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.1.0",
+    "@react-native-firebase/app": "^24.0.0",
     "@react-native-masked-view/masked-view": "^0.3.2",
     "@react-native/new-app-screen": "0.84.0",
     "@react-navigation/native": "^7.1.28",
@@ -23,8 +35,10 @@
     "react": "19.2.3",
     "react-native": "0.84.0",
     "react-native-gesture-handler": "^2.30.0",
+    "react-native-inappbrowser-reborn": "^3.7.1",
     "react-native-safe-area-context": "^5.6.2",
     "react-native-screens": "^4.23.0",
+    "react-native-webview": "^13.16.1",
     "react-redux": "^9.2.0",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
@@ -52,5 +66,8 @@
   },
   "engines": {
     "node": ">= 22.11.0"
+  },
+  "overrides": {
+    "hermes-compiler": "250829098.0.13"
   }
 }

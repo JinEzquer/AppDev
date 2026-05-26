@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "292350801793",
+    "project_id": "patricks-cold-cuts",
+    "storage_bucket": "patricks-cold-cuts.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:292350801793:android:f81de7b6356dfc2ac75a80",
+        "android_client_info": {
+          "package_name": "com.ezquerdev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBys-GNdfWe5tnLxH4M6_u7NINhB9gVFCI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
