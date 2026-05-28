@@ -13,9 +13,15 @@ type RealtimeConfigResponse = {
  *
  * This avoids hardcoding the Railway WS URL in the mobile app.
  */
-export async function bootstrapWebSocketFromBackend(): Promise<void> {
+export async function bootstrapWebSocketFromBackend(authToken?: string | null): Promise<void> {
   try {
-    const res = (await apiFetch('/api/customer/realtime-config')) as RealtimeConfigResponse;
+    const headers =
+      authToken && String(authToken).trim()
+        ? { Authorization: `Bearer ${String(authToken).trim()}` }
+        : undefined;
+    const res = (await apiFetch('/api/customer/realtime-config', {
+      headers,
+    })) as RealtimeConfigResponse;
     const wsUrl = res?.data?.wsUrl ? String(res.data.wsUrl).trim() : '';
     if (wsUrl) {
       websocketClient.setUrl(wsUrl);

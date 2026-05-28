@@ -54,7 +54,7 @@ export default function FirebaseBootstrap({ children }: Props) {
         await new Promise<void>(resolve => setTimeout(resolve, 2000));
 
         // Configure realtime WS URL from backend (Railway) if available.
-        await bootstrapWebSocketFromBackend();
+        await bootstrapWebSocketFromBackend(authToken);
 
         await ensureNotificationChannel();
 
