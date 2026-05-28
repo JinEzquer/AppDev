@@ -16,6 +16,7 @@ import rootSaga from './src/app/sagas';
 import RootNavigation from './src/navigations';
 import FirebaseBootstrap from './src/components/FirebaseBootstrap';
 import SessionExpiredHandler from './src/components/SessionExpiredHandler';
+import OrderStatusWatcher from './src/components/OrderStatusWatcher';
 import { CartProvider } from './src/context/CartContext';
 import { CartFlyProvider } from './src/context/CartFlyContext';
 import { FavoritesProvider } from './src/context/FavoritesContext';
@@ -72,6 +73,7 @@ const App = () => {
                   ) : null}
                   <View style={styles.appShell}>
                     <SessionExpiredHandler />
+                    <OrderStatusWatcher />
                     <FirebaseBootstrap>
                       <RootNavigation />
                     </FirebaseBootstrap>

@@ -63,6 +63,13 @@ const OrderDetailScreen = () => {
   }, [load]);
 
   useEffect(() => {
+    const timer = setInterval(() => {
+      load();
+    }, 8000);
+    return () => clearInterval(timer);
+  }, [load]);
+
+  useEffect(() => {
     const offMessage = websocketClient.onMessage(payload => {
       try {
         const parsed = JSON.parse(payload);

@@ -361,6 +361,13 @@ const HomeScreen = () => {
     }, [catalog.loadProducts]),
   );
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      catalog.loadProducts(true);
+    }, 10000);
+    return () => clearInterval(timer);
+  }, [catalog.loadProducts]);
+
   const popular = useMemo(() => catalog.filtered.slice(0, 10), [catalog.filtered]);
   const cartCount = useMemo(
     () => lines?.reduce((acc, l) => acc + (Number(l.quantity) || 0), 0) ?? 0,
