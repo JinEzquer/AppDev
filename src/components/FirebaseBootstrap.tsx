@@ -51,11 +51,6 @@ export default function FirebaseBootstrap({ children }: Props) {
 
     (async () => {
       try {
-        await new Promise<void>(resolve => setTimeout(resolve, 2000));
-
-        // Configure realtime WS URL from backend (Railway) if available.
-        await bootstrapWebSocketFromBackend(authToken);
-
         await ensureNotificationChannel();
 
         const token = await registerForPushNotifications();
@@ -89,6 +84,9 @@ export default function FirebaseBootstrap({ children }: Props) {
         if (initial) {
           handleNotificationNavigation(initial);
         }
+
+        // Realtime socket is optional; run after notifications are ready.
+        await bootstrapWebSocketFromBackend(authToken);
       } catch (err) {
         console.warn('[FCM] Bootstrap failed', err);
       }

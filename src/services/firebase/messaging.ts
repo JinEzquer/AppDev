@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { PermissionsAndroid, Platform } from 'react-native';
+import { getRemoteMessageContent, showRemoteMessageNotification } from './handleRemoteMessage';
 import { displayLocalNotification } from './notifications';
 
 const FCM_TOKEN_KEY = 'fcm_token';
@@ -72,24 +73,6 @@ export function listenForTokenRefresh(onToken: (token: string) => void): () => v
   });
 }
 
-function getMessageTitleAndBody(
-  remoteMessage: FirebaseMessagingTypes.RemoteMessage,
-): { title: string; body: string } | null {
-  const title =
-    remoteMessage.notification?.title ??
-    (typeof remoteMessage.data?.title === 'string' ? remoteMessage.data.title : null) ??
-    "Patrick's Cold Cuts";
-  const body =
-    remoteMessage.notification?.body ??
-    (typeof remoteMessage.data?.body === 'string' ? remoteMessage.data.body : null);
-
-  if (!body) {
-    return null;
-  }
-
-  return { title, body };
-}
-
 export function listenForForegroundMessages(
   onMessage?: (message: FirebaseMessagingTypes.RemoteMessage) => void,
 ): () => void {
@@ -102,15 +85,13 @@ export function listenForForegroundMessages(
 
     onMessage?.(remoteMessage);
 
-    const content = getMessageTitleAndBody(remoteMessage);
-    if (!content) {
-      logFcm('Foreground message had no title/body — use notification payload in Firebase Console');
-      return;
-    }
-
     try {
-      await displayLocalNotification(content.title, content.body);
-      logFcm('Foreground notification displayed in status bar');
+      const shown = await showRemoteMessageNotification(remoteMessage);
+      if (shown) {
+        logFcm('Foreground notification displayed in status bar');
+      } else {
+        logFcm('Foreground message had no title/body', getRemoteMessageContent(remoteMessage));
+      }
     } catch (err) {
       logFcm('Failed to display foreground notification', err);
     }

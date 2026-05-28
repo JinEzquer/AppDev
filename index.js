@@ -7,10 +7,15 @@ import messaging from '@react-native-firebase/messaging';
 import { AppRegistry } from 'react-native';
 import App from './App';
 import { name as appName } from './app.json';
+import { showRemoteMessageNotification } from './src/services/firebase/handleRemoteMessage';
 
-// Required for data-only FCM messages while app is in background/killed.
+// Show order approved/rejected alerts when app is in background.
 messaging().setBackgroundMessageHandler(async remoteMessage => {
-  console.log('[FCM] Background message:', remoteMessage?.messageId ?? 'unknown');
+  try {
+    await showRemoteMessageNotification(remoteMessage);
+  } catch (err) {
+    console.warn('[FCM] Background notification failed', err);
+  }
 });
 
 AppRegistry.registerComponent(appName, () => App);
