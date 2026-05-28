@@ -30,7 +30,17 @@ class WebSocketClient {
 
     this.clearReconnectTimer();
     this.state = 'connecting';
-    this.socket = new WebSocket(this.url);
+    try {
+      this.socket = new WebSocket(this.url);
+    } catch (error) {
+      this.state = 'closed';
+      this.errorHandlers.forEach(handler => handler(error));
+      this.closeHandlers.forEach(handler => handler());
+      if (this.shouldReconnect) {
+        this.reconnectTimer = setTimeout(() => this.connect(), this.reconnectDelayMs);
+      }
+      return;
+    }
 
     this.socket.onopen = () => {
       this.state = 'open';

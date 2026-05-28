@@ -23,11 +23,18 @@ export async function bootstrapWebSocketFromBackend(authToken?: string | null): 
       headers,
     })) as RealtimeConfigResponse;
     const wsUrl = res?.data?.wsUrl ? String(res.data.wsUrl).trim() : '';
-    if (wsUrl) {
+    if (isValidWebSocketUrl(wsUrl)) {
       websocketClient.setUrl(wsUrl);
     }
   } catch {
     // Non-fatal. We'll keep default localhost settings for dev.
   }
+}
+
+function isValidWebSocketUrl(url: string): boolean {
+  if (!url || /[<>]/.test(url)) {
+    return false;
+  }
+  return /^wss?:\/\/[^\s]+$/i.test(url);
 }
 
