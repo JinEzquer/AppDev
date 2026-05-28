@@ -1,11 +1,13 @@
+import EventSource from 'react-native-sse';
 import { getDefaultWebSocketUrl } from '../../config/websocket';
 
 type MessageHandler = (payload: string) => void;
 type State = 'idle' | 'connecting' | 'open' | 'closed';
 
 class WebSocketClient {
-  private socket: WebSocket | null = null;
+  private socket: EventSource | null = null;
   private url: string = getDefaultWebSocketUrl();
+  private authToken: string | null = null;
   private reconnectDelayMs = 3000;
   private shouldReconnect = true;
   private state: State = 'idle';
@@ -25,13 +27,14 @@ class WebSocketClient {
 
     // If a socket is currently connecting/open to an old URL, restart so the
     // new backend-provided Railway URL takes effect immediately.
-    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
-      try {
-        this.socket.close();
-      } catch {
-        // Best-effort close only.
-      }
+    this.disconnect();
+    if (this.shouldReconnect) {
+      this.connect();
     }
+  }
+
+  setAuthToken(token: string | null | undefined): void {
+    this.authToken = token ? String(token).trim() : null;
   }
 
   getState(): State {
@@ -39,14 +42,18 @@ class WebSocketClient {
   }
 
   connect(): void {
-    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+    if (this.socket) {
       return;
     }
 
     this.clearReconnectTimer();
     this.state = 'connecting';
     try {
-      this.socket = new WebSocket(this.url);
+      const streamUrl = this.buildMercureStreamUrl(this.url);
+      this.socket = new EventSource(streamUrl, {
+        headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : undefined,
+        pollingInterval: 0,
+      });
     } catch (error) {
       this.state = 'closed';
       this.errorHandlers.forEach(handler => handler(error));
@@ -57,34 +64,35 @@ class WebSocketClient {
       return;
     }
 
-    this.socket.onopen = () => {
+    this.socket.addEventListener('open', () => {
       this.state = 'open';
       this.openHandlers.forEach(handler => handler());
-    };
+    });
 
-    this.socket.onmessage = event => {
-      const payload = typeof event.data === 'string' ? event.data : JSON.stringify(event.data);
+    this.socket.addEventListener('message', event => {
+      const payload = typeof event.data === 'string' ? event.data : JSON.stringify(event.data ?? '');
       this.messageHandlers.forEach(handler => handler(payload));
-    };
+    });
 
-    this.socket.onerror = error => {
+    this.socket.addEventListener('error', error => {
       this.errorHandlers.forEach(handler => handler(error));
-    };
+    });
 
-    this.socket.onclose = () => {
+    this.socket.addEventListener('close', () => {
       this.state = 'closed';
       this.closeHandlers.forEach(handler => handler());
       this.socket = null;
       if (this.shouldReconnect) {
         this.reconnectTimer = setTimeout(() => this.connect(), this.reconnectDelayMs);
       }
-    };
+    });
   }
 
   disconnect(): void {
     this.shouldReconnect = false;
     this.clearReconnectTimer();
     if (this.socket) {
+      this.socket.removeAllEventListeners();
       this.socket.close();
       this.socket = null;
     }
@@ -100,12 +108,8 @@ class WebSocketClient {
   }
 
   send(message: string | Record<string, unknown>): boolean {
-    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-      return false;
-    }
-    const payload = typeof message === 'string' ? message : JSON.stringify(message);
-    this.socket.send(payload);
-    return true;
+    // Mercure is one-way server->client. Keep method for UI compatibility.
+    return !!message && this.state === 'open';
   }
 
   onMessage(handler: MessageHandler): () => void {
@@ -133,6 +137,23 @@ class WebSocketClient {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
+  }
+
+  private buildMercureStreamUrl(rawUrl: string): string {
+    const base = rawUrl.includes('/.well-known/mercure')
+      ? rawUrl
+      : `${rawUrl.replace(/\/$/, '')}/.well-known/mercure`;
+
+    const sep = base.includes('?') ? '&' : '?';
+    const topics = [
+      'order_status_changed',
+      'order_placed',
+      'catalog_changed',
+    ]
+      .map(topic => `topic=${encodeURIComponent(topic)}`)
+      .join('&');
+
+    return `${base}${sep}${topics}`;
   }
 }
 

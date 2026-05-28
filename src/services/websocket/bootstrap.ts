@@ -4,6 +4,7 @@ import { websocketClient } from './client';
 type RealtimeConfigResponse = {
   data?: {
     wsUrl?: string | null;
+    mercureUrl?: string | null;
   };
 };
 
@@ -22,19 +23,24 @@ export async function bootstrapWebSocketFromBackend(authToken?: string | null): 
     const res = (await apiFetch('/api/customer/realtime-config', {
       headers,
     })) as RealtimeConfigResponse;
-    const wsUrl = res?.data?.wsUrl ? String(res.data.wsUrl).trim() : '';
-    if (isValidWebSocketUrl(wsUrl)) {
-      websocketClient.setUrl(wsUrl);
+    websocketClient.setAuthToken(authToken);
+    const realtimeUrl = res?.data?.mercureUrl
+      ? String(res.data.mercureUrl).trim()
+      : res?.data?.wsUrl
+        ? String(res.data.wsUrl).trim()
+        : '';
+    if (isValidRealtimeUrl(realtimeUrl)) {
+      websocketClient.setUrl(realtimeUrl);
     }
   } catch {
     // Non-fatal. We'll keep default localhost settings for dev.
   }
 }
 
-function isValidWebSocketUrl(url: string): boolean {
+function isValidRealtimeUrl(url: string): boolean {
   if (!url || /[<>]/.test(url)) {
     return false;
   }
-  return /^wss?:\/\/[^\s]+$/i.test(url);
+  return /^https?:\/\/[^\s]+$/i.test(url);
 }
 

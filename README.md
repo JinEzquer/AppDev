@@ -123,16 +123,11 @@ Full guide: `../PatricksColdCut/docs/GOOGLE-OAUTH-MOBILE.md`
 
 `src/app/api/customer.ts` — products, profile, orders, payments.
 
-## WebSocket (local)
+## Realtime (Mercure)
 
-Start local socket server:
-
-```bat
-npm run ws:server
-```
-
-Client helper is ready at `src/services/websocket/client.ts`.
-Default URL is set in `src/config/websocket.ts` (`ws://10.0.2.2:8080` for Android emulator).
+- Mobile subscribes to Mercure topics via SSE in `src/services/websocket/client.ts`.
+- URL is loaded from backend `/api/customer/realtime-config`.
+- Local fallback is `http://10.0.2.2:8000/.well-known/mercure` on Android emulator.
 
 ## Docs (backend)
 
