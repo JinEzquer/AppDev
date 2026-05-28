@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jean Patrick T. Ezquer</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #0b1220;
+      color: #f8fafc;
+    }
+
+    .card {
+      width: min(680px, 92vw);
+      padding: 24px;
+      border-radius: 14px;
+      background: #111827;
+      border: 1px solid #334155;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+
+    .picker {
+      margin: 12px 0 18px;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 8px 12px;
+      font-size: 0.95rem;
+    }
+
+    .label {
+      color: #94a3b8;
+    }
+
+    .value {
+      color: #e2e8f0;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Jean Patrick T. Ezquer</h1>
+    <div class="picker">
+      <input id="apkInput" type="file" accept=".apk,application/vnd.android.package-archive" />
+    </div>
+    <section class="grid" id="result">
+      <div class="label">Status</div>
+      <div class="value">Select an APK file</div>
+    </section>
+  </main>
+
+  <script>
+    const apkInput = document.getElementById("apkInput");
+    const result = document.getElementById("result");
+
+    function setRows(rows) {
+      result.innerHTML = rows
+        .map(([label, value]) => `<div class="label">${label}</div><div class="value">${value}</div>`)
+        .join("");
+    }
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes) || bytes < 0) return "n/a";
+      const units = ["B", "KB", "MB", "GB"];
+      let size = bytes;
+      let index = 0;
+      while (size >= 1024 && index < units.length - 1) {
+        size /= 1024;
+        index += 1;
+      }
+      return `${size.toFixed(index === 0 ? 0 : 2)} ${units[index]}`;
+    }
+
+    async function digestFile(file, algorithm) {
+      const buffer = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest(algorithm, buffer);
+      const hashArray = [...new Uint8Array(hashBuffer)];
+      return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    apkInput.addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) {
+        setRows([["Status", "Select an APK file"]]);
+        return;
+      }
+
+      if (!file.name.toLowerCase().endsWith(".apk")) {
+        setRows([
+          ["Status", "Invalid file"],
+          ["Reason", "Please select a file with .apk extension"]
+        ]);
+        return;
+      }
+
+      setRows([["Status", "Analyzing..."]]);
+
+      try {
+        const [sha1, sha256] = await Promise.all([
+          digestFile(file, "SHA-1"),
+          digestFile(file, "SHA-256")
+        ]);
+
+        setRows([
+          ["Status", "Analysis complete"],
+          ["File name", file.name],
+          ["File size", formatBytes(file.size)],
+          ["File type", file.type || "application/vnd.android.package-archive"],
+          ["Last modified", new Date(file.lastModified).toLocaleString()],
+          ["SHA-1", sha1],
+          ["SHA-256", sha256]
+        ]);
+      } catch (error) {
+        setRows([
+          ["Status", "Analysis failed"],
+          ["Error", error?.message || "Unknown error"]
+        ]);
+      }
+    });
+  </script>
+</body>
+</html>
