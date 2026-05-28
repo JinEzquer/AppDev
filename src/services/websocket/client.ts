@@ -7,7 +7,6 @@ type State = 'idle' | 'connecting' | 'open' | 'closed';
 class WebSocketClient {
   private socket: EventSource | null = null;
   private url: string = getDefaultWebSocketUrl();
-  private authToken: string | null = null;
   private reconnectDelayMs = 3000;
   private shouldReconnect = true;
   private state: State = 'idle';
@@ -33,10 +32,6 @@ class WebSocketClient {
     }
   }
 
-  setAuthToken(token: string | null | undefined): void {
-    this.authToken = token ? String(token).trim() : null;
-  }
-
   getState(): State {
     return this.state;
   }
@@ -51,7 +46,9 @@ class WebSocketClient {
     try {
       const streamUrl = this.buildMercureStreamUrl(this.url);
       this.socket = new EventSource(streamUrl, {
-        headers: this.authToken ? { Authorization: `Bearer ${this.authToken}` } : undefined,
+        // Mercure public stream (anonymous subscribe) for mobile realtime updates.
+        // Do not pass app JWT here: Mercure expects its own subscriber JWT format.
+        headers: undefined,
         pollingInterval: 0,
       });
     } catch (error) {

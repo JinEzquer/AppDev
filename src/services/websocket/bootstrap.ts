@@ -23,7 +23,6 @@ export async function bootstrapWebSocketFromBackend(authToken?: string | null): 
     const res = (await apiFetch('/api/customer/realtime-config', {
       headers,
     })) as RealtimeConfigResponse;
-    websocketClient.setAuthToken(authToken);
     const realtimeUrl = res?.data?.mercureUrl
       ? String(res.data.mercureUrl).trim()
       : res?.data?.wsUrl
