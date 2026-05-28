@@ -5,6 +5,9 @@ import { displayLocalNotification } from '../services/firebase/notifications';
 
 type AuthSlice = {
   auth?: {
+    data?: {
+      token?: string | null;
+    };
     token?: string | null;
   };
 };
@@ -20,7 +23,9 @@ type OrderSnapshot = {
  * in case realtime stream delivery is delayed.
  */
 export default function OrderStatusWatcher() {
-  const authToken = useSelector((state: AuthSlice) => state.auth?.token ?? null);
+  const authToken = useSelector(
+    (state: AuthSlice) => state.auth?.data?.token ?? state.auth?.token ?? null,
+  );
   const knownStatusesRef = useRef<Map<number, string>>(new Map());
   const notifiedTransitionsRef = useRef<Set<string>>(new Set());
 

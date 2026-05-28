@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import GuestPrompt from '../components/GuestPrompt';
 import PageHeader from '../components/home/PageHeader';
@@ -70,6 +71,22 @@ const HistoryScreen = () => {
   useEffect(() => {
     if (!isGuest) loadOrders();
   }, [loadOrders, isGuest]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!isGuest) {
+        loadOrders(true);
+      }
+    }, [isGuest, loadOrders]),
+  );
+
+  useEffect(() => {
+    if (isGuest) return;
+    const timer = setInterval(() => {
+      loadOrders(true);
+    }, 8000);
+    return () => clearInterval(timer);
+  }, [isGuest, loadOrders]);
 
   if (isGuest) {
     return (
