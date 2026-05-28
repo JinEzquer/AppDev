@@ -16,7 +16,22 @@ class WebSocketClient {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   setUrl(url: string): void {
-    this.url = url;
+    const nextUrl = String(url || '').trim();
+    if (!nextUrl || nextUrl === this.url) {
+      return;
+    }
+
+    this.url = nextUrl;
+
+    // If a socket is currently connecting/open to an old URL, restart so the
+    // new backend-provided Railway URL takes effect immediately.
+    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+      try {
+        this.socket.close();
+      } catch {
+        // Best-effort close only.
+      }
+    }
   }
 
   getState(): State {
