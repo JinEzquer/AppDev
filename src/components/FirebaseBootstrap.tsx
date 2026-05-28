@@ -14,7 +14,6 @@ import {
   setAnalyticsUserId,
   syncFcmTokenToBackend,
 } from '../services/firebase';
-import { bootstrapWebSocketFromBackend } from '../services/websocket/bootstrap';
 
 type Props = {
   children: ReactNode;
@@ -85,8 +84,6 @@ export default function FirebaseBootstrap({ children }: Props) {
           handleNotificationNavigation(initial);
         }
 
-        // Realtime socket is optional; run after notifications are ready.
-        await bootstrapWebSocketFromBackend(authToken);
       } catch (err) {
         console.warn('[FCM] Bootstrap failed', err);
       }

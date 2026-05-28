@@ -22,34 +22,26 @@ This file summarizes the security controls currently implemented in the project.
 - FCM token is cleared on logout to reduce stale-token account linkage.
 - Foreground notification rendering uses local notification channel with explicit app icon/channel.
 
-## 4) Realtime (WebSocket) security
-
-- WebSocket backend broadcast endpoint (`/broadcast`) is protected by shared secret header (`x-ws-secret`).
-- Symfony backend sends realtime events only through configured secret (`REALTIME_BROADCAST_SECRET`).
-- Mobile app fetches websocket URL from backend config endpoint, avoiding hardcoded production URLs.
-- URL validation guards prevent invalid websocket config values from crashing the client.
-
-## 5) Sensitive configuration handling
+## 4) Sensitive configuration handling
 
 - Secrets are expected via environment variables (Railway), not hardcoded in app source.
 - Firebase service account JSON is stored in deployment variables, not committed in repo.
-- JWT/Firebase/realtime secrets are separated by service and managed at runtime.
+- JWT and Firebase secrets are separated by service and managed at runtime.
 
-## 6) Input validation and integrity
+## 5) Input validation and integrity
 
 - Checkout validates required delivery fields and future delivery schedule.
 - Backend normalizes/validates payment method values before persisting.
 - Server-side validation remains source of truth for all order/payment writes.
 
-## 7) Build/release safety
+## 6) Build/release safety
 
 - Release APK uses signing config from local keystore properties.
 - No secrets are bundled into public README examples or committed source files intentionally.
 
-## 8) Operational recommendations
+## 7) Operational recommendations
 
-- Rotate realtime and Firebase secrets before final production handoff.
-- Keep `REALTIME_BROADCAST_SECRET` and `WS_BROADCAST_SECRET` identical, private, and unique.
+- Rotate Firebase and JWT-related secrets before final production handoff.
 - Periodically clear stale FCM tokens for inactive accounts.
 - Keep dependency versions updated and monitor backend logs for auth/realtime failures.
 
