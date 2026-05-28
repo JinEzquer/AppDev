@@ -14,6 +14,8 @@ import {
   setAnalyticsUserId,
   syncFcmTokenToBackend,
 } from '../services/firebase';
+import { bootstrapWebSocketFromBackend } from '../services/websocket/bootstrap';
+import { websocketClient } from '../services/websocket/client';
 
 type Props = {
   children: ReactNode;
@@ -50,6 +52,14 @@ export default function FirebaseBootstrap({ children }: Props) {
 
     (async () => {
       try {
+        await new Promise<void>(resolve => setTimeout(resolve, 2000));
+
+        // Configure and start realtime websocket once for the app.
+        await bootstrapWebSocketFromBackend(authToken);
+        websocketClient.enableReconnect(true);
+        websocketClient.setReconnectDelay(3000);
+        websocketClient.connect();
+
         await ensureNotificationChannel();
 
         const token = await registerForPushNotifications();
@@ -83,7 +93,6 @@ export default function FirebaseBootstrap({ children }: Props) {
         if (initial) {
           handleNotificationNavigation(initial);
         }
-
       } catch (err) {
         console.warn('[FCM] Bootstrap failed', err);
       }
@@ -93,6 +102,7 @@ export default function FirebaseBootstrap({ children }: Props) {
       unsubToken();
       unsubForeground();
       unsubOpen();
+      websocketClient.disconnect();
     };
   }, [authToken]);
 

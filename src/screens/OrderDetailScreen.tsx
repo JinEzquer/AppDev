@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import { COLORS, RADIUS, SPACING } from '../utils';
 import { formatDeliveryWhen } from '../utils/deliverySchedule';
 import { formatPeso } from '../utils/productOrder';
+import { websocketClient } from '../services/websocket/client';
 
 const statusLabel = status => {
   switch (status) {
@@ -60,6 +61,25 @@ const OrderDetailScreen = () => {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    const offMessage = websocketClient.onMessage(payload => {
+      try {
+        const parsed = JSON.parse(payload);
+        if (parsed?.type !== 'order_status_changed') {
+          return;
+        }
+        if (Number(parsed?.orderId) !== Number(orderId)) {
+          return;
+        }
+        load();
+      } catch {
+        // ignore non-JSON payload
+      }
+    });
+
+    return () => offMessage();
+  }, [load, orderId]);
 
   const orderPayments = useMemo(
     () => payments.filter(p => Number(p.orderId) === Number(orderId)),
