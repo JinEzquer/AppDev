@@ -1,7 +1,7 @@
 const { WebSocketServer } = require('ws');
 const http = require('http');
 
-const PORT = Number(process.env.WS_PORT || 8080);
+const PORT = Number(process.env.PORT || process.env.WS_PORT || 8080);
 const BROADCAST_SECRET = process.env.WS_BROADCAST_SECRET || '';
 
 // Use a shared HTTP server so we can accept HTTP broadcasts + WS connections on one port.
