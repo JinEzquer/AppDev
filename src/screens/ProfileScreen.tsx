@@ -179,8 +179,8 @@ const ProfileScreen = () => {
         }}
       />
       <MenuRow label="Saved items" hint="Your favourites" onPress={() => navigation.navigate(ROUTES.FAVORITES)} />
-      {__DEV__ ? (
-        <>
+      <>
+      <Text style={styles.toolsHeading}>Notification tools</Text>
       <MenuRow
         label="Copy FCM token"
         hint="One tap — paste in Firebase Send test message"
@@ -220,8 +220,7 @@ const ProfileScreen = () => {
           }
         }}
       />
-        </>
-      ) : null}
+      </>
 
       <TouchableOpacity
         style={authStyles.primaryBtn}
@@ -319,6 +318,15 @@ const styles = StyleSheet.create({
   menuLabelDanger: { color: COLORS.red },
   menuHint: { fontFamily: FONT, fontSize: 12, color: COLORS.textMuted, marginTop: 2 },
   menuChevron: { fontSize: 22, color: COLORS.textMuted, marginLeft: SPACING.sm },
+  toolsHeading: {
+    fontFamily: FONT,
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.navy2,
+    marginBottom: SPACING.sm,
+    marginTop: SPACING.sm,
+    letterSpacing: 0.2,
+  },
 });
 
 export default ProfileScreen;
