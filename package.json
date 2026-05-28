@@ -16,6 +16,7 @@
     "android:release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/android-release.ps1",
     "icons:android": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-android-icons.ps1",
     "ios": "react-native run-ios",
+    "ws:server": "node websocket-server.js",
     "lint": "eslint .",
     "start": "react-native start --port 8081 --host 0.0.0.0",
     "test": "jest",
@@ -23,8 +24,12 @@
     "server:dev": "nodemon server.js"
   },
   "dependencies": {
+    "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^2.1.0",
+    "@react-native-clipboard/clipboard": "^1.16.3",
+    "@react-native-firebase/analytics": "^24.0.0",
     "@react-native-firebase/app": "^24.0.0",
+    "@react-native-firebase/messaging": "^24.0.0",
     "@react-native-masked-view/masked-view": "^0.3.2",
     "@react-native/new-app-screen": "0.84.0",
     "@react-navigation/native": "^7.1.28",
@@ -42,7 +47,8 @@
     "react-redux": "^9.2.0",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
-    "redux-saga": "^1.4.2"
+    "redux-saga": "^1.4.2",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

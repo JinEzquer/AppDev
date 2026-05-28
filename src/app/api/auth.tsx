@@ -9,7 +9,8 @@ export async function userLogin({ username, password }) {
 
   try {
     const data = await apiFetch('/api/login', { method: 'POST', body });
-    const isVerified = data.user?.isVerified ?? data.user?.verified ?? false;
+    // Server only allows verified users to log in; default true when the flag is omitted from JSON.
+    const isVerified = data.user?.isVerified ?? data.user?.verified ?? true;
     return {
       token: data.token,
       user: {

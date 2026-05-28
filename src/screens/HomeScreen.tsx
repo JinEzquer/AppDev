@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -20,6 +20,7 @@ import { useCartFly } from '../context/CartFlyContext';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useProductCatalog } from '../hooks/useProductCatalog';
+import { websocketClient } from '../services/websocket/client';
 import { COLORS, ROUTES, SPACING, resolveAssetUrl } from '../utils';
 import { resolveProductOrder } from '../utils/productOrder';
 
@@ -322,6 +323,32 @@ const HomeScreen = () => {
   const { flyToCart } = useCartFly();
   const { toggleFavorite, isFavorite } = useFavorites();
   const catalog = useProductCatalog();
+  const [wsStatus, setWsStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
+  const [lastWsMessage, setLastWsMessage] = useState('Waiting for messages...');
+
+  useEffect(() => {
+    websocketClient.enableReconnect(true);
+    websocketClient.setReconnectDelay(3000);
+
+    const offOpen = websocketClient.onOpen(() => {
+      setWsStatus('connected');
+      websocketClient.send({ type: 'hello', from: 'Jean Patrick T. Ezquer', screen: 'HomeScreen' });
+    });
+    const offClose = websocketClient.onClose(() => setWsStatus('disconnected'));
+    const offError = websocketClient.onError(() => setWsStatus('disconnected'));
+    const offMessage = websocketClient.onMessage(payload => setLastWsMessage(payload));
+
+    setWsStatus('connecting');
+    websocketClient.connect();
+
+    return () => {
+      offOpen();
+      offClose();
+      offError();
+      offMessage();
+      websocketClient.disconnect();
+    };
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -352,6 +379,16 @@ const HomeScreen = () => {
   );
 
   const scrollToProducts = () => listRef.current?.scrollToOffset?.({ offset: 700, animated: true });
+  const sendWsPing = () => {
+    const sent = websocketClient.send({
+      type: 'ping',
+      at: new Date().toISOString(),
+      from: 'Jean Patrick T. Ezquer',
+    });
+    if (!sent) {
+      Alert.alert('WebSocket', 'Socket not connected yet.');
+    }
+  };
 
   const renderPopular = useCallback(
     ({ item }: any) => (
@@ -401,6 +438,31 @@ const HomeScreen = () => {
           sortBy={catalog.sortBy}
           onSortChange={catalog.setSortBy}
         />
+      </View>
+
+      {/* WebSocket status */}
+      <View style={s.wsCard}>
+        <View style={s.wsRow}>
+          <Text style={s.wsTitle}>Live Socket</Text>
+          <Text
+            style={[
+              s.wsStatus,
+              wsStatus === 'connected'
+                ? s.wsConnected
+                : wsStatus === 'connecting'
+                  ? s.wsConnecting
+                  : s.wsDisconnected,
+            ]}
+          >
+            {wsStatus.toUpperCase()}
+          </Text>
+        </View>
+        <Text style={s.wsMessage} numberOfLines={2}>
+          {lastWsMessage}
+        </Text>
+        <TouchableOpacity style={s.wsButton} onPress={sendWsPing} activeOpacity={0.85}>
+          <Text style={s.wsButtonText}>Send Test Ping</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Promo banner */}
@@ -491,6 +553,16 @@ const s = StyleSheet.create({
   centered:     { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: BRAND.cream, gap: 12 },
   loadingText:  { fontSize: 13, color: BRAND.muted, marginTop: 4 },
   searchWrap:   { paddingHorizontal: SPACING.lg, marginBottom: SPACING.md },
+  wsCard:       { marginHorizontal: SPACING.lg, marginBottom: SPACING.md, backgroundColor: BRAND.white, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(7,16,58,0.08)', padding: 12, gap: 8 },
+  wsRow:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  wsTitle:      { fontSize: 13, fontWeight: '700', color: BRAND.navy },
+  wsStatus:     { fontSize: 11, fontWeight: '700' },
+  wsConnected:  { color: '#0f9d58' },
+  wsConnecting: { color: BRAND.gold },
+  wsDisconnected:{ color: BRAND.red },
+  wsMessage:    { fontSize: 11, color: BRAND.muted },
+  wsButton:     { alignSelf: 'flex-start', backgroundColor: BRAND.navy, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
+  wsButtonText: { fontSize: 11, color: BRAND.white, fontWeight: '700' },
   catList:      { paddingHorizontal: SPACING.lg, paddingBottom: 4 },
   hList:        { paddingLeft: SPACING.lg, paddingBottom: SPACING.lg },
   list:         { paddingHorizontal: SPACING.lg, paddingBottom: 120 },

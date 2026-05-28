@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Ezquerdev</string>
+    <string name="default_notification_channel_name">Orders &amp; updates</string>
+    <string name="default_notification_channel_description">Notifications from Patricks Cold Cuts</string>
 </resources>

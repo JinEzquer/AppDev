@@ -24,6 +24,21 @@ export async function updateCustomerProfile(token, body) {
   return apiFetch(`${BASE}/profile`, { method: 'PATCH', token, body });
 }
 
+export async function registerDeviceFcmToken(token, fcmToken) {
+  return apiFetch(`${BASE}/fcm-token`, {
+    method: 'POST',
+    token,
+    body: { token: fcmToken },
+  });
+}
+
+export async function clearDeviceFcmToken(token) {
+  return apiFetch(`${BASE}/fcm-token`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
 // --- Orders ---
 
 export async function getCustomerOrders(token) {
@@ -45,6 +60,8 @@ export async function createCustomerOrder(
     deliveryAddress,
     deliveryContactPhone,
     deliveryNotes,
+    paymentMethod,
+    paymentReference,
   },
 ) {
   const body = {
@@ -62,6 +79,16 @@ export async function createCustomerOrder(
     if (orderUnit) {
       body.orderUnit = orderUnit;
     }
+  }
+
+  // Payment selection is required for the backend to record the correct method.
+  // If omitted, backend will treat it as missing and we won't have a payment method
+  // until (legacy) approval auto-fills it.
+  if (paymentMethod !== undefined) {
+    body.paymentMethod = paymentMethod;
+  }
+  if (paymentReference !== undefined) {
+    body.paymentReference = paymentReference;
   }
 
   return apiFetch(`${BASE}/orders`, {

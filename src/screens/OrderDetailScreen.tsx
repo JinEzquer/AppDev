@@ -3,33 +3,21 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  Modal,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
-import CustomButton from '../components/CustomButton';
 import {
-  createCustomerPayment,
   getCustomerOrder,
   getCustomerPayments,
 } from '../app/api/customer';
 import { useNavigation } from '@react-navigation/native';
-import { COLORS, RADIUS, SPACING, requireVerifiedCustomer } from '../utils';
+import { COLORS, RADIUS, SPACING } from '../utils';
 import { formatDeliveryWhen } from '../utils/deliverySchedule';
 import { formatPeso } from '../utils/productOrder';
-
-const PAYMENT_METHODS = [
-  { value: 'gcash', label: 'GCash' },
-  { value: 'card', label: 'Card' },
-  { value: 'cash', label: 'Cash' },
-  { value: 'bank_transfer', label: 'Bank transfer' },
-];
 
 const statusLabel = status => {
   switch (status) {
@@ -51,11 +39,6 @@ const OrderDetailScreen = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [payModal, setPayModal] = useState(false);
-  const [payMethod, setPayMethod] = useState('gcash');
-  const [payReference, setPayReference] = useState('');
-  const [paying, setPaying] = useState(false);
-
   const load = useCallback(async () => {
     if (!authData?.token || !orderId) return;
     setLoading(true);
@@ -84,28 +67,6 @@ const OrderDetailScreen = () => {
   );
 
   const isPaid = orderPayments.some(p => p.status === 'completed');
-  const canPay = order && order.status !== 'CANCELED' && !isPaid;
-
-  const handlePay = async () => {
-    if (!requireVerifiedCustomer(navigation, authData, 'pay for orders')) {
-      return;
-    }
-    setPaying(true);
-    try {
-      const response = await createCustomerPayment(authData.token, {
-        orderId: Number(orderId),
-        method: payMethod,
-        reference: payReference.trim() || undefined,
-      });
-      setPayModal(false);
-      Alert.alert('Payment recorded', response?.message || 'Thank you for your payment.');
-      load();
-    } catch (err) {
-      Alert.alert('Payment failed', err?.message || 'Please try again.');
-    } finally {
-      setPaying(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -175,71 +136,28 @@ const OrderDetailScreen = () => {
 
         {orderPayments.length > 0 ? (
           <>
-            <Text style={styles.sectionTitle}>Payments</Text>
+            <Text style={styles.sectionTitle}>Payment</Text>
             {orderPayments.map(p => (
               <View key={p.id} style={styles.lineCard}>
                 <Text style={styles.lineName}>
-                  {p.method} · {formatPeso(p.amount)}
+                  {p.method?.charAt(0).toUpperCase() + p.method?.slice(1)} · {formatPeso(p.amount)}
+                  {' · '}
+                  <Text style={p.status === 'completed' ? styles.statusPaid : styles.statusPending}>
+                    {p.status === 'completed' ? 'Paid' : 'Pending confirmation'}
+                  </Text>
                 </Text>
-                <Text style={styles.lineMeta}>
-                  {p.paidAt ? new Date(p.paidAt).toLocaleString() : ''}
-                  {p.reference ? ` · Ref: ${p.reference}` : ''}
-                </Text>
+                {p.reference ? (
+                  <Text style={styles.lineMeta}>Ref: {p.reference}</Text>
+                ) : null}
+                {p.paidAt ? (
+                  <Text style={styles.lineMeta}>{new Date(p.paidAt).toLocaleString()}</Text>
+                ) : null}
               </View>
             ))}
           </>
         ) : null}
       </ScrollView>
 
-      {canPay ? (
-        <View style={styles.footer}>
-          <CustomButton label="PAY NOW" onPress={() => setPayModal(true)} />
-        </View>
-      ) : null}
-
-      <Modal visible={payModal} animationType="slide" transparent onRequestClose={() => setPayModal(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Pay for order #{order.id}</Text>
-            <Text style={styles.modalAmount}>Amount: {formatPeso(order.total)}</Text>
-            <Text style={styles.label}>Payment method</Text>
-            <View style={styles.methodRow}>
-              {PAYMENT_METHODS.map(m => (
-                <TouchableOpacity
-                  key={m.value}
-                  style={[styles.methodChip, payMethod === m.value && styles.methodChipActive]}
-                  onPress={() => setPayMethod(m.value)}
-                >
-                  <Text
-                    style={[styles.methodChipText, payMethod === m.value && styles.methodChipTextActive]}
-                  >
-                    {m.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <Text style={styles.label}>Reference (optional)</Text>
-            <TextInput
-              style={styles.input}
-              value={payReference}
-              onChangeText={setPayReference}
-              placeholder="GCash ref, receipt no."
-              placeholderTextColor={COLORS.textMuted}
-            />
-            <CustomButton
-              label={paying ? 'PROCESSING…' : 'CONFIRM PAYMENT'}
-              onPress={handlePay}
-              disabled={paying}
-            />
-            <CustomButton
-              label="CLOSE"
-              variant="secondary"
-              onPress={() => setPayModal(false)}
-              containerStyle={{ marginTop: SPACING.sm }}
-            />
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -280,51 +198,9 @@ const styles = StyleSheet.create({
   },
   lineName: { fontSize: 15, fontWeight: '600', color: COLORS.text },
   lineMeta: { fontSize: 13, color: COLORS.textMuted, marginTop: SPACING.xs },
-  footer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    padding: SPACING.lg,
-    backgroundColor: COLORS.white,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
-    justifyContent: 'flex-end',
-  },
-  modalCard: {
-    backgroundColor: COLORS.white,
-    borderTopLeftRadius: RADIUS.xl,
-    borderTopRightRadius: RADIUS.xl,
-    padding: SPACING.lg,
-    paddingBottom: SPACING.xxl,
-  },
-  modalTitle: { fontSize: 20, fontWeight: '700', color: COLORS.primary },
-  modalAmount: { fontSize: 16, color: COLORS.text, marginVertical: SPACING.md },
-  label: { fontSize: 12, fontWeight: '600', color: COLORS.textMuted, marginBottom: SPACING.xs, marginTop: SPACING.sm },
-  input: {
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    fontSize: 15,
-    marginBottom: SPACING.md,
-  },
-  methodRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm },
-  methodChip: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.pill,
-    backgroundColor: COLORS.chipBg,
-  },
-  methodChipActive: { backgroundColor: COLORS.primary },
-  methodChipText: { color: COLORS.textMuted, fontWeight: '600', fontSize: 13 },
-  methodChipTextActive: { color: COLORS.white },
   error: { color: COLORS.accent, textAlign: 'center' },
+  statusPaid: { color: COLORS.success, fontWeight: '700' },
+  statusPending: { color: COLORS.gold, fontWeight: '700' },
 });
 
 export default OrderDetailScreen;

@@ -123,6 +123,17 @@ Full guide: `../PatricksColdCut/docs/GOOGLE-OAUTH-MOBILE.md`
 
 `src/app/api/customer.ts` — products, profile, orders, payments.
 
+## WebSocket (local)
+
+Start local socket server:
+
+```bat
+npm run ws:server
+```
+
+Client helper is ready at `src/services/websocket/client.ts`.
+Default URL is set in `src/config/websocket.ts` (`ws://10.0.2.2:8080` for Android emulator).
+
 ## Docs (backend)
 
 | File | Purpose |

@@ -9,8 +9,10 @@ import { ROUTES } from './routes';
 export function isCustomerVerified(authData) {
   if (!authData?.token) return false;
   const u = authData.user;
+  if (u?.verified === false || u?.isVerified === false) return false;
   if (u?.verified === true || u?.isVerified === true) return true;
-  return false;
+  // Login API only succeeds for verified accounts; omitting the flag used to block checkout.
+  return true;
 }
 
 export function promptEmailVerification(navigation, email, reason = 'place orders') {

@@ -112,6 +112,38 @@ const ProductDetailScreen = () => {
     navigation.navigate(ROUTES.CART);
   };
 
+  const handleOrderNow = () => {
+    if (!canOrder || !product) {
+      Alert.alert('Out of stock', 'This product is not available right now.');
+      return;
+    }
+    if (!authData?.token) {
+      navigation.navigate(ROUTES.LOGIN, { message: 'Sign in to order' });
+      return;
+    }
+    if (!requireVerifiedCustomer(navigation, authData, 'place orders')) {
+      return;
+    }
+
+    const directItems = [
+      {
+        productId: product.id,
+        quantity,
+        orderUnit: selectedUnit,
+        name: product.name,
+        order,
+        price: product.price,
+        subtotal: lineTotal,
+        key: `direct-${product.id}`,
+      },
+    ];
+
+    navigation.navigate(ROUTES.CHECKOUT, {
+      directItems,
+      directTotal: lineTotal,
+    });
+  };
+
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -234,11 +266,17 @@ const ProductDetailScreen = () => {
               <Text style={styles.orderBtnText}>{!canOrder ? 'OUT OF STOCK' : 'ADD TO CART'}</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.cartBtn} onPress={handleGoToCart} activeOpacity={0.85}>
-            <Text style={styles.cartBtnText}>
-              CART{totals.count > 0 ? ` (${totals.count})` : ''}
-            </Text>
-          </TouchableOpacity>
+          {canOrder ? (
+            <TouchableOpacity style={styles.orderNowBtn} onPress={handleOrderNow} activeOpacity={0.85}>
+              <Text style={styles.orderNowText}>ORDER NOW</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.cartBtn} onPress={handleGoToCart} activeOpacity={0.85}>
+              <Text style={styles.cartBtnText}>
+                CART{totals.count > 0 ? ` (${totals.count})` : ''}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
@@ -342,6 +380,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cartBtnText: { color: COLORS.white, fontSize: 13, fontWeight: '800' },
+  orderNowBtn: {
+    backgroundColor: COLORS.navy2,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  orderNowText: { color: COLORS.white, fontSize: 13, fontWeight: '800' },
   orderBtnDisabled: { opacity: 0.7 },
   orderBtnText: { color: COLORS.white, fontSize: 14, fontWeight: '700', letterSpacing: 0.5 },
   error: { color: COLORS.accent, textAlign: 'center' },

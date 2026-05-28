@@ -14,6 +14,8 @@ import { PersistGate } from 'redux-persist/integration/react';
 import configureStore from './src/app/reducers';
 import rootSaga from './src/app/sagas';
 import RootNavigation from './src/navigations';
+import FirebaseBootstrap from './src/components/FirebaseBootstrap';
+import SessionExpiredHandler from './src/components/SessionExpiredHandler';
 import { CartProvider } from './src/context/CartContext';
 import { CartFlyProvider } from './src/context/CartFlyContext';
 import { FavoritesProvider } from './src/context/FavoritesContext';
@@ -76,7 +78,10 @@ const App = () => {
                     </View>
                   ) : null}
                   <View style={styles.appShell}>
-                    <RootNavigation />
+                    <SessionExpiredHandler />
+                    <FirebaseBootstrap>
+                      <RootNavigation />
+                    </FirebaseBootstrap>
                   </View>
                 </FavoritesProvider>
               </CartFlyProvider>

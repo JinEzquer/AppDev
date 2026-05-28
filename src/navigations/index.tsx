@@ -3,6 +3,7 @@ import { DefaultTheme, NavigationContainer, getStateFromPath as defaultGetStateF
 import { RAILWAY_API_URL } from '../config/apiTarget';
 import EmailVerifyLinkHandler from '../components/EmailVerifyLinkHandler';
 import GoogleAuthLinkHandler from '../components/GoogleAuthLinkHandler';
+import { logScreenView } from '../services/firebase';
 import { COLORS } from '../utils';
 import MainNav from './MainNav';
 import { navigationRef } from './navigationRef';
@@ -44,7 +45,17 @@ const navTheme = {
 export default () => (
   <GoogleAuthLinkHandler>
     <EmailVerifyLinkHandler>
-      <NavigationContainer ref={navigationRef} theme={navTheme} linking={linking}>
+      <NavigationContainer
+        ref={navigationRef}
+        theme={navTheme}
+        linking={linking}
+        onStateChange={() => {
+          const route = navigationRef.getCurrentRoute();
+          if (route?.name) {
+            logScreenView(route.name);
+          }
+        }}
+      >
         <MainNav />
       </NavigationContainer>
     </EmailVerifyLinkHandler>

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useCallback, useState } from 'react';
+import Clipboard from '@react-native-clipboard/clipboard';
 import {
   ActivityIndicator,
   Alert,
@@ -31,6 +32,11 @@ import {
   isCustomerVerified,
   requireVerifiedCustomer,
 } from '../utils';
+import {
+  getStoredFcmToken,
+  registerForPushNotifications,
+  showTestLocalNotification,
+} from '../services/firebase';
 
 function MenuRow({ label, hint, onPress, danger }) {
   return (
@@ -173,6 +179,49 @@ const ProfileScreen = () => {
         }}
       />
       <MenuRow label="Saved items" hint="Your favourites" onPress={() => navigation.navigate(ROUTES.FAVORITES)} />
+      {__DEV__ ? (
+        <>
+      <MenuRow
+        label="Copy FCM token"
+        hint="One tap — paste in Firebase Send test message"
+        onPress={async () => {
+          let token = await getStoredFcmToken();
+          if (!token) {
+            token = await registerForPushNotifications();
+          }
+          if (!token) {
+            Alert.alert(
+              'No token yet',
+              'Allow notifications when prompted (or in Settings → Apps → Ezquerdev → Notifications), then try again. The emulator needs Google Play services.',
+            );
+            return;
+          }
+
+          Clipboard.setString(token);
+          Alert.alert(
+            'Token copied',
+            'Paste it in Firebase Console → Compose → Send test message.\n\nImportant: press Home before sending the test so the app is in the background. Do not copy from logcat (line breaks break the token).',
+            [{ text: 'OK' }],
+          );
+        }}
+      />
+      <MenuRow
+        label="Test local notification"
+        hint="Checks notification channel on this device"
+        onPress={async () => {
+          try {
+            await showTestLocalNotification();
+            Alert.alert(
+              'Test sent',
+              'Pull down the status bar. If you see a notification, this device can show alerts. Then try Firebase Send test message with the copied token.',
+            );
+          } catch (err) {
+            Alert.alert('Test failed', err?.message ?? 'Could not show notification');
+          }
+        }}
+      />
+        </>
+      ) : null}
 
       <TouchableOpacity
         style={authStyles.primaryBtn}
