@@ -19,7 +19,7 @@ import SessionExpiredHandler from './src/components/SessionExpiredHandler';
 import { CartProvider } from './src/context/CartContext';
 import { CartFlyProvider } from './src/context/CartFlyContext';
 import { FavoritesProvider } from './src/context/FavoritesContext';
-import { COLORS, SPACING, getApiBaseUrl, initApiBaseUrl, isUsingRailwayApi } from './src/utils';
+import { COLORS, SPACING, initApiBaseUrl } from './src/utils';
 
 const { store, persistor, runSaga } = configureStore();
 runSaga(rootSaga);
@@ -60,13 +60,6 @@ const App = () => {
             <CartProvider>
               <CartFlyProvider>
                 <FavoritesProvider>
-                  {!apiError && isUsingRailwayApi() ? (
-                    <View style={styles.apiBannerOk}>
-                      <Text style={styles.apiBannerOkText} numberOfLines={2}>
-                        Connected to Railway — {getApiBaseUrl().replace(/^https?:\/\//, '')}
-                      </Text>
-                    </View>
-                  ) : null}
                   {apiError ? (
                     <View style={styles.apiBanner}>
                       <Text style={styles.apiBannerText} numberOfLines={3}>
@@ -136,14 +129,6 @@ const styles = StyleSheet.create({
   },
   apiBannerText: { fontSize: 12, color: COLORS.textMuted, lineHeight: 16 },
   apiBannerRetry: { fontSize: 12, fontWeight: '700', color: COLORS.navy2, marginTop: 4 },
-  apiBannerOk: {
-    backgroundColor: COLORS.successBg,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  apiBannerOkText: { fontSize: 12, color: COLORS.success, fontWeight: '600' },
 });
 
 export default App;

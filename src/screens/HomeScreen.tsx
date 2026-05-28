@@ -440,30 +440,32 @@ const HomeScreen = () => {
         />
       </View>
 
-      {/* WebSocket status */}
-      <View style={s.wsCard}>
-        <View style={s.wsRow}>
-          <Text style={s.wsTitle}>Live Socket</Text>
-          <Text
-            style={[
-              s.wsStatus,
-              wsStatus === 'connected'
-                ? s.wsConnected
-                : wsStatus === 'connecting'
-                  ? s.wsConnecting
-                  : s.wsDisconnected,
-            ]}
-          >
-            {wsStatus.toUpperCase()}
+      {/* WebSocket debug card (kept for development only) */}
+      {__DEV__ ? (
+        <View style={s.wsCard}>
+          <View style={s.wsRow}>
+            <Text style={s.wsTitle}>Live Socket</Text>
+            <Text
+              style={[
+                s.wsStatus,
+                wsStatus === 'connected'
+                  ? s.wsConnected
+                  : wsStatus === 'connecting'
+                    ? s.wsConnecting
+                    : s.wsDisconnected,
+              ]}
+            >
+              {wsStatus.toUpperCase()}
+            </Text>
+          </View>
+          <Text style={s.wsMessage} numberOfLines={2}>
+            {lastWsMessage}
           </Text>
+          <TouchableOpacity style={s.wsButton} onPress={sendWsPing} activeOpacity={0.85}>
+            <Text style={s.wsButtonText}>Send Test Ping</Text>
+          </TouchableOpacity>
         </View>
-        <Text style={s.wsMessage} numberOfLines={2}>
-          {lastWsMessage}
-        </Text>
-        <TouchableOpacity style={s.wsButton} onPress={sendWsPing} activeOpacity={0.85}>
-          <Text style={s.wsButtonText}>Send Test Ping</Text>
-        </TouchableOpacity>
-      </View>
+      ) : null}
 
       {/* Promo banner */}
       <PromoVideoBanner onPress={scrollToProducts} />
