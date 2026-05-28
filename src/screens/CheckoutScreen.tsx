@@ -19,6 +19,7 @@ import { useCart } from '../context/CartContext';
 import { COLORS, RADIUS, ROUTES, SPACING, requireVerifiedCustomer } from '../utils';
 import { buildDeliveryScheduledAt, defaultDeliveryDate } from '../utils/deliverySchedule';
 import { formatPeso, formatQuantityValue } from '../utils/productOrder';
+import { displayLocalNotification } from '../services/firebase/notifications';
 
 const PAYMENT_OPTIONS = [
   { key: 'gcash', label: 'GCash', sub: 'Pay via GCash' },
@@ -123,13 +124,31 @@ const CheckoutScreen = () => {
         [
           {
             text: 'View order',
-            onPress: () =>
+            onPress: async () => {
+              try {
+                await displayLocalNotification(
+                  "Patrick's Cold Cuts",
+                  `Order #${newOrderId ?? ''} placed successfully and is pending approval.`,
+                );
+              } catch {}
               navigation.navigate(
                 newOrderId ? ROUTES.ORDER_DETAIL : ROUTES.HISTORY,
                 newOrderId ? { orderId: newOrderId } : undefined,
-              ),
+              );
+            },
           },
-          { text: 'OK', onPress: () => navigation.navigate(ROUTES.HISTORY) },
+          {
+            text: 'OK',
+            onPress: async () => {
+              try {
+                await displayLocalNotification(
+                  "Patrick's Cold Cuts",
+                  `Order #${newOrderId ?? ''} placed successfully and is pending approval.`,
+                );
+              } catch {}
+              navigation.navigate(ROUTES.HISTORY);
+            },
+          },
         ],
       );
     } catch (err) {
